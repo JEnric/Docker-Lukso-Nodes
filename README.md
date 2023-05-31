@@ -1,8 +1,8 @@
 # JeTson's unofficial LUKSO Docker containers
 
-This repo provides Docker images to run different kinds of LUKSO node (validator and non validator nodes).
+This repo provides Docker images to run different kinds of LUKSO nodes (validator and non validator nodes).
 
-Note: it has been tested on Ubuntu 22.04.
+Note: Containers have been tested on Ubuntu 22.04.
 
 LUKSO network configs are fetched from: [lukso-network/network-configs](https://github.com/lukso-network/network-configs).
 
@@ -10,8 +10,9 @@ It is provided "as is" and you are encouraged to adjust the configuration files 
 
 - `genesis.ssz`
 - `genesis.json`
+- `config.yaml`
 
-They can be found in our [`lukso-network/network-configs`](https://github.com/lukso-network/network-configs) repo.
+They can be found in the official [`lukso-network/network-configs`](https://github.com/lukso-network/network-configs) repository.
 
 For more information, check the [LUKSO Docs](https://docs.lukso.tech/networks/mainnet/running-a-node/).
 
@@ -21,7 +22,7 @@ For more information, check the [LUKSO Docs](https://docs.lukso.tech/networks/ma
 2. Install [Docker](https://docs.docker.com/engine/install/ubuntu/).
 3. Install [Docker Compose](https://docs.docker.com/compose/install/linux/)
 
-3. Clone the repo.
+3. Clone the repo with the following:
 
 ```sh
 git clone https://github.com/JEnric/Docker-Lukso-Nodes.git
@@ -29,9 +30,9 @@ git clone https://github.com/JEnric/Docker-Lukso-Nodes.git
 
 4. Check if the config files from [`lukso-network/network-configs`](https://github.com/lukso-network/network-configs) are up to date.
 
-5. **IMPORTANT:** Edit the `.env` file and adjust the values in `.env` file (node name, fee recipient address, etc.).
+5. **IMPORTANT:** Edit the `.env` file in the chosen client folder and adjust the values (node name, fee recipient address, etc.).
 
-6. Copy your `keystore-xxx.json` files in the [`./keystores/`](./keystores) folder.
+6. Copy your `keystore-xxx.json` files in the `./<chosen client folder>/keystores/` folder.
 
 7. Write your keystore password in a temporary txt file:
 
@@ -67,12 +68,13 @@ Check the logs to make sure everything is running fine:
 
 ```sh
 docker compose logs -f prysm_beacon
-
-# You can see the logs of each service:
-# docker compose logs -f prysm_validator
-# ...
 ```
+You can see the logs of each service:
 
+```docker compose logs -f prysm_validator
+docker compose logs -f erigon
+docker compose logs -f geth
+```
 ## Monitoring
 
 Grafana will be available on port 3000
@@ -81,7 +83,7 @@ Grafana will be available on port 3000
 
 To add your node on the [execution stats page](https://stats.execution.mainnet.lukso.network/), fill out [this form](https://docs.google.com/forms/d/e/1FAIpQLSf6_vflZkaRh8dgHMiFtZI5g3DrBFKP4Sc2l2DBW95OWRFO9g/viewform) to receive the secret.
 
-You will then need to update these values in the [`.env`](./.env) file:
+You will then need to update these values in the `.env` file:
 
 ```
 NODE_NAME=myNodeName
