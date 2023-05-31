@@ -26,9 +26,11 @@ For more information, check the [LUKSO Docs](https://docs.lukso.tech/networks/ma
 git clone https://github.com/JEnric/Docker-Lukso-Nodes.git
 ```
 
-4. Check if the config files from [`lukso-network/network-configs`](https://github.com/lukso-network/network-configs) are up to date.
+4. Check if the config files in the config directory are equal to the same files found here: [`lukso-network/network-configs`](https://github.com/lukso-network/network-configs/tree/main/mainnet/shared).
 
 5. **IMPORTANT:** Edit the `.env` file in the chosen client folder and adjust the values (node name, fee recipient address, etc.).
+
+---If you want to run a validator---
 
 6. Copy your `keystore-xxx.json` files in the `./<chosen client folder>/keystores/` folder.
 
@@ -41,6 +43,8 @@ echo "yourPassword" > /tmp/secrets/password.txt
 NOTE 1: This password will also be used for the validator wallet.
 
 NOTE 2: You can set your keystore password differently by changing the configuration in the `docker-compose.yml` file for the `prysm_validator_import` service.
+
+---End of validator part---
 
 8. Start the services from the chosen client subfolder with the docker-compose.yml inside:
 
