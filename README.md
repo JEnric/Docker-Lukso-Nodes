@@ -4,15 +4,13 @@ This repo provides Docker images to run different kinds of LUKSO nodes (validato
 
 Note: Containers have been tested on Ubuntu 22.04.
 
-LUKSO network configs are fetched from: [lukso-network/network-configs](https://github.com/lukso-network/network-configs).
+LUKSO network configs are fetched from the official repository: [lukso-network/network-configs](https://github.com/lukso-network/network-configs).
 
 It is provided "as is" and you are encouraged to adjust the configuration files for your own needs. The most important configuration files are the genesis files:
 
 - `genesis.ssz`
 - `genesis.json`
 - `config.yaml`
-
-They can be found in the official [`lukso-network/network-configs`](https://github.com/lukso-network/network-configs) repository.
 
 For more information, check the [LUKSO Docs](https://docs.lukso.tech/networks/mainnet/running-a-node/).
 
@@ -44,7 +42,7 @@ NOTE 1: This password will also be used for the validator wallet.
 
 NOTE 2: You can set your keystore password differently by changing the configuration in the `docker-compose.yml` file for the `prysm_validator_import` service.
 
-8. Start the services:
+8. Start the services from the chosen client subfolder with the docker-compose.yml inside:
 
 ```sh
 docker compose up
