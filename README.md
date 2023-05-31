@@ -50,9 +50,8 @@ NOTE 2: You can set your keystore password differently by changing the configura
 
 ```sh
 docker compose up
-
-# To run in the background, use detached mode with -d flag
 ```
+To run in the background, use detached mode with -d flag
 
 ### Useful commands
 
