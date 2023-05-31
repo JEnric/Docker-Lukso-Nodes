@@ -76,6 +76,8 @@ You can see the logs of each service:
 docker compose logs -f erigon
 docker compose logs -f geth
 ```
+Note: Check the exact names in the docker-compose.yml you have started.
+
 ## Monitoring
 
 Grafana will be available on port 3000
