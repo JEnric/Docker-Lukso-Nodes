@@ -30,7 +30,7 @@ git clone https://github.com/JEnric/Docker-Lukso-Nodes.git
 
 5. **IMPORTANT:** Edit the `.env` file in the chosen client folder and adjust the values (node name, fee recipient address, etc.).
 
----If you want to run a validator---
+---If you want to run a validator proceed with 6. Otherwise go to step 8.---
 
 6. Copy your `keystore-xxx.json` files in the `./<chosen client folder>/keystores/` folder.
 
