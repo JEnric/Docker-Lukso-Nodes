@@ -1,0 +1,213 @@
+version: "3.8"
+services:
+  init-erigon:
+    image: thorax/erigon:$ERIGON_VERSION
+    container_name: init-erigon
+    volumes:
+      - $EXECUTION_DATA_VOLUME:/execution_data
+      - $CONFIGS_VOLUME:/configs
+    command: >
+      --datadir=/execution_data init /configs/genesis.json
+
+  erigon:
+    image: thorax/erigon:$ERIGON_VERSION
+    container_name: erigon
+    depends_on:
+      - init-erigon
+    volumes:
+      - $EXECUTION_DATA_VOLUME:/execution_data
+      - $CONFIGS_VOLUME:/configs
+    restart: unless-stopped
+    stop_signal: SIGINT
+    stop_grace_period: 2m
+    command: >
+      --datadir=/execution_data
+      --networkid=$LUKSO_MAINNET_NETWORK_ID
+      --externalcl
+      --miner.gaslimit=42000000
+      --authrpc.jwtsecret=/configs/jwt.hex
+      --snapshots=0
+      --nat="extip:$EXTERNAL_IP"
+      --http
+      --http.addr="0.0.0.0"
+      --http.api="erigon,engine"
+      --http.vhosts="*"
+      --authrpc.addr="0.0.0.0"
+      --authrpc.port=8551
+      --authrpc.vhosts="*"
+      --bootnodes="$EXECUTION_BOOTSTRAP_NODE_1,$EXECUTION_BOOTSTRAP_NODE_2"
+      --metrics
+      --metrics.addr="0.0.0.0"
+    #--ethstats="${NODE_NAME}:${ETH_STATS_SECRET}@${ETH_STATS_ADDRESS}"
+    ports:
+      - "30303:30303" # eth/66 peering
+      - "30304:30304" # eth/67 peering
+      - "9090:9090" # gRPC Connections
+      - "42069:42069" # Snap sync (Bittorrent)
+      - "6060:6060" # Metrics or Pprof
+      - "6061:6061" # Metrics
+      - "6062:6062" # Metrics 
+      - "8551:8551" # Engine API (JWT auth), authrpc
+      - "8545:8545" # HTTP-RPC server
+    logging:
+      driver: "local"
+      options:
+        max-size: "100m"
+        
+  prysm_beacon:
+    image: prysmaticlabs/prysm-beacon-chain:$PRYSM_BEACON_VERSION
+    container_name: prysm_beacon
+    hostname: prysm_beacon
+    depends_on:
+      - erigon
+    volumes:
+      - $CONSENSUS_DATA_VOLUME:/consensus_data
+      - $CONFIGS_VOLUME:/configs
+    restart: unless-stopped
+    stop_signal: SIGINT
+    stop_grace_period: 2m
+    command: >
+      --accept-terms-of-use
+      --genesis-state=/configs/genesis.ssz
+      --chain-config-file=/configs/config.yaml
+      --datadir=/consensus_data
+      --bootstrap-node $PRYSM_BOOTSTRAP_NODE
+      --execution-endpoint=http://erigon:8551
+      --jwt-secret=/configs/jwt.hex
+      --min-sync-peers=0
+      --monitoring-host 0.0.0.0
+      --grpc-gateway-host 0.0.0.0
+      --rpc-host 0.0.0.0
+      --verbosity $PRYSM_VERBOSITY
+      --p2p-max-peers 250
+      --subscribe-all-subnets
+      --minimum-peers-per-subnet 0
+      --contract-deployment-block 0
+      --block-batch-limit 512
+      --block-batch-limit-burst-factor 10
+      --p2p-host-dns $DOMAIN
+      --suggested-fee-recipient $FEE_RECIPIENT
+     #--p2p-host-ip $EXTERNAL_IP
+     # exchange the previous with --p2p-host-dns if you have a static external IP.
+     # Add your custom flags here.
+     # Docs: https://docs.prylabs.network/docs/prysm-usage/parameters#beacon-node-flags
+    ports:
+      - 4000:4000
+      - 13000:13000/tcp
+      - 12000:12000/udp
+    logging:
+      driver: "local"
+      options:
+        max-size: "100m"
+
+  prysm_validator_import:
+    image: prysmaticlabs/prysm-validator:$PRYSM_BEACON_VERSION
+    container_name: prysm_validator_import
+    hostname: prysm_validator_import
+    volumes:
+      - $KEYSTORES_VOLUME:/keystore
+      - $VALIDATOR_DATA_VOLUME:/validator_data
+      - $TMP_VOLUME:/tmp/secrets
+    command: >
+      accounts import
+      --accept-terms-of-use
+      --keys-dir=/keystore
+      --wallet-dir=/keystore/prysm
+      --wallet-password-file=/tmp/secrets/password.txt
+      --account-password-file=/tmp/secrets/password.txt
+
+  prysm_validator:
+    image: prysmaticlabs/prysm-validator:$PRYSM_BEACON_VERSION
+    container_name: prysm_validator
+    hostname: prysm_validator
+    depends_on:
+      prysm_beacon:
+        condition: service_started
+      prysm_validator_import:
+        condition: service_completed_successfully
+    volumes:
+      - $KEYSTORES_VOLUME:/keystore
+      - $VALIDATOR_DATA_VOLUME:/validator_data
+      - $CONFIGS_VOLUME:/configs
+      - $TMP_VOLUME:/tmp/secrets
+    restart: unless-stopped
+    stop_signal: SIGINT
+    stop_grace_period: 2m
+    command: >
+      --accept-terms-of-use
+      --datadir /validator_data
+      --wallet-dir /keystore/prysm
+      --wallet-password-file /tmp/secrets/password.txt
+      --chain-config-file /configs/config.yaml
+      --monitoring-host 0.0.0.0
+      --grpc-gateway-host 0.0.0.0
+      --rpc-host 0.0.0.0
+      --suggested-fee-recipient $FEE_RECIPIENT
+    ports:   
+      - ${BEACON_API_IP}:7500:7500/tcp
+    logging:
+      driver: "local"
+      options:
+        max-size: "100m"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "90:9090" #prometheus will be accessable under port 90 (i.e. localhost:90) on your node
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    expose:
+      - 9100
+
+  json-exporter:
+    image: quay.io/prometheuscommunity/json-exporter
+    container_name: json-exporter
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/exporters/json-exporter/config.yml:/config.yml
+    command:
+      - '--config.file=/config.yml'
+    expose:
+      - 7979
+
+  grafana:
+    image: grafana/grafana:latest
+    user: "472:0" # required for grafana version >= 7.3
+    container_name: grafana
+    hostname: grafana
+    restart: on-failure
+    depends_on:
+      - prometheus
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+

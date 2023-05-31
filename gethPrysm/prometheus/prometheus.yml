@@ -1,0 +1,77 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+
+  - job_name: "prometheus"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["prometheus:9090"]
+
+  - job_name: "beacon node"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["prysm_beacon:8080"]
+
+  - job_name: "node_exporter"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["node-exporter:9100"]
+
+  - job_name: "validator"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["prysm_validator:8081"]
+
+  - job_name: json_exporter
+    static_configs:
+      - targets:
+          - json-exporter:7979
+
+  - job_name: json
+    metrics_path: /probe
+    static_configs:
+      - targets:
+          - https://api.coingecko.com/api/v3/simple/price?ids=lukso-token&vs_currencies=usd
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: json-exporter:7979
+
+
+  - job_name: "geth"
+    metrics_path: /debug/metrics/prometheus
+    scheme: http
+    static_configs:
+      - targets:
+          - "geth:6060"
+
+
+# From: https://github.com/ledgerwatch/erigon/blob/devel/cmd/prometheus/prometheus.yml
+  - job_name: erigon # example, how to connect prometheus to Erigon
+    metrics_path: /debug/metrics/prometheus
+    scheme: http
+    static_configs:
+      - targets:
+          - erigon:6060 # If Erigon runned by default docker-compose, then it's available on `erigon` host.
+          - erigon:6061
+          - erigon:6062
+          - localhost:6060 # this is how docker-for-mac allow to access host machine
+          - localhost:6061
+          - localhost:6062
+
+  - job_name: erigon2 # this job collecting metrics in OpenMetrics format
+    metrics_path: /debug/metrics/prometheus2
+    scheme: http
+    static_configs:
+      - targets:
+          - erigon:6060
+          - erigon:6061
+          - erigon:6062
+          - localhost:6060
+          - localhost:6061
+          - localhost:6062
