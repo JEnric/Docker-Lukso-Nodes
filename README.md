@@ -2,6 +2,10 @@
 
 This repo provides Docker images to run different kinds of LUKSO nodes (validator and non validator nodes).
 
+Currently:
+- Erigon as Execution Client with Prysm as Consensus Client
+- Geth as Execution Client with Prysm as Consensus Client
+
 Note: Containers have been tested on Ubuntu 22.04.
 
 LUKSO network configs were fetched from the official repository: [lukso-network/network-configs](https://github.com/lukso-network/network-configs).
