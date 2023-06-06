@@ -4,7 +4,7 @@ This repo provides Docker images to run different kinds of LUKSO nodes (validato
 
 Note: Containers have been tested on Ubuntu 22.04.
 
-LUKSO network configs are fetched from the official repository: [lukso-network/network-configs](https://github.com/lukso-network/network-configs).
+LUKSO network configs were fetched from the official repository: [lukso-network/network-configs](https://github.com/lukso-network/network-configs).
 
 It is provided "as is" and you are encouraged to adjust the configuration files for your own needs. The most important configuration files are the genesis files:
 
@@ -18,7 +18,7 @@ For more information, check the [LUKSO Docs](https://docs.lukso.tech/networks/ma
 
 1. Log into your node.
 2. Install [Docker](https://docs.docker.com/engine/install/ubuntu/).
-3. Install [Docker Compose](https://docs.docker.com/compose/install/linux/)
+3. Install [Docker Compose](https://docs.docker.com/compose/install/linux/).
 
 3. Clone the repo with the following:
 
@@ -28,7 +28,7 @@ git clone https://github.com/JEnric/Docker-Lukso-Nodes.git
 
 4. Check if the config files in the config directory are equal to the same files found here: [`lukso-network/network-configs`](https://github.com/lukso-network/network-configs/tree/main/mainnet/shared).
 
-5. **IMPORTANT:** Edit the `.env` file in the chosen client folder and adjust the values (node name, fee recipient address, etc.).
+5. **IMPORTANT:** Edit the `.env` file in the chosen client folder and adjust the values (NODE_NAME, FEE_RECIPIENT, EXTERNAL_IP/DOMAIN, and more if needed).
 
 ---If you want to run a validator proceed with 6. Otherwise go to step 8.---
 
@@ -72,12 +72,23 @@ docker compose logs -f prysm_beacon
 ```
 You can see the logs of each service:
 
-```docker compose logs -f prysm_validator
-docker compose logs -f erigon
-docker compose logs -f geth
 ```
-Note: Check the exact names in the docker-compose.yml you have started.
+docker compose logs -f <container name>
+```
+Note: Check the exact container names in the docker-compose.yml you have started.
 
+To stop the containers execute the following from the chosen client subfolder with the docker-compose.yml inside:
+```sh
+docker compose stop
+```
+[Docker compose reference:](https://docs.docker.com/compose/reference/)
+```sh
+docker compose up          Create and start containers
+docker compose down        Stop and remove containers, networks
+docker compose restart     Restart service containers
+docker compose start       Start services
+docker compose stop        Stop services
+```
 ## Monitoring
 
 Grafana will be available on port 3000
