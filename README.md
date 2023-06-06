@@ -95,26 +95,26 @@ docker compose stop        Stop services
 ```
 ## Monitoring
 
-Grafana will be available on port 3000
+Grafana will be available on port 3000. ```local-node-ip:3000```
 
 ## Firewall & Port Forwarding
 
 
-Node Firewall
-        Port 8445: DENY
-        Port 3500: DENY
-        Port 8551: DENY
-        Port 4000: DENY
-        Port 12000: ALLOW
-        Port 13000: ALLOW
-        Port 30303: ALLOW
-Port Forwarding
-        Open Port 12000 UDP
-        Open Port 13000 TCP
-        Open Port 30303 TCP+UDP
+Node Firewall:
+- Port 8445: DENY
+- Port 3500: DENY
+- Port 8551: DENY
+- Port 4000: DENY
+- Port 12000: ALLOW
+- Port 13000: ALLOW
+- Port 30303: ALLOW
 
+Router Port Forwarding:
+- Forward Port 12000 UDP
+- Forward Port 13000 TCP
+- Forward Port 30303 TCP+UDP
 
-https://docs.prylabs.network/docs/prysm-usage/p2p-host-ip
+[More details about the ports](https://docs.prylabs.network/docs/prysm-usage/p2p-host-ip)
 
 ### Execution stats
 
