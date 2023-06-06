@@ -97,6 +97,25 @@ docker compose stop        Stop services
 
 Grafana will be available on port 3000
 
+## Firewall & Port Forwarding
+
+
+Node Firewall
+        Port 8445: DENY
+        Port 3500: DENY
+        Port 8551: DENY
+        Port 4000: DENY
+        Port 12000: ALLOW
+        Port 13000: ALLOW
+        Port 30303: ALLOW
+Port Forwarding
+        Open Port 12000 UDP
+        Open Port 13000 TCP
+        Open Port 30303 TCP+UDP
+
+
+https://docs.prylabs.network/docs/prysm-usage/p2p-host-ip
+
 ### Execution stats
 
 To add your node on the [execution stats page](https://stats.execution.mainnet.lukso.network/), fill out [this form](https://docs.google.com/forms/d/e/1FAIpQLSf6_vflZkaRh8dgHMiFtZI5g3DrBFKP4Sc2l2DBW95OWRFO9g/viewform) to receive the secret.
